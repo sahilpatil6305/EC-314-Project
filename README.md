@@ -2,14 +2,7 @@
 
 A hands-on network simulation tool built to understand how data flows through all 7 OSI layers. This project explores real channel models, ARQ protocols, error correction, and visualizes everything in real-time.
 
-## Why This Project?
 
-The goal was to build something practical that could answer questions like:
-- How do different ARQ protocols (Stop-Wait vs Go-Back-N) affect throughput?
-- What happens to packet delivery when you add fading and noise?
-- How do error correction schemes like Hamming codes actually improve reliability?
-
-Instead of just reading about it in a textbook, you can tweak parameters and see the results live.
 
 ## Getting Started
 
