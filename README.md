@@ -79,7 +79,7 @@ telecom-sim-v2/
 | ARQ Mode | Stop-Wait, Go-Back-N, Selective Repeat | Retransmission strategy |
 | Encoding | None, Hamming, Reed-Solomon, Turbo, LDPC | Error handling |
 
-## The Math (If You're Curious)
+## The Math 
 
 **Shannon Capacity:**
 ```
@@ -91,13 +91,6 @@ C = B × log₂(1 + SNR)   [Mbps]
 - Rayleigh: `Pb ≈ 0.5 × (1 − √(SNR/(1+SNR)))`
 - Two-Ray: `Pb ≈ 2×10⁻³ / SNR²`
 
-## Extending This
-
-Want to add something new?
-- New network preset → edit `config/defaults.js`
-- New encoding scheme → add to `src/encoding/Codec.js`
-- New topology → modify `src/engine/Topology.js`
-- Custom scenarios → add REST endpoints in `server.js`
 
 ## Dependencies
 
@@ -107,18 +100,10 @@ Just two npm packages:
 
 Plus `nodemon` for development.
 
-## Learning Outcomes
-
-By the time you're done exploring this, you should understand:
-- How protocols stack and each layer adds its own headers
-- Why channel models matter (noise isn't just random — it follows patterns)
-- How ARQ window sizes trade off latency vs throughput
-- When to use which error correction code
-- How real networks stay reliable despite noise and interference
 
 ## Notes
 
-This is built for education first, performance second. The simulator can handle networks of 2-12 nodes smoothly. Beyond that, you might hit browser rendering limits.
+The simulator can handle networks of 2-12 nodes smoothly. Beyond that, you might hit browser rendering limits.
 
 The channel models use standard communications theory formulas. If you're comparing against real data, tweak the K-factor for Rician or the Two-Ray parameters to match your environment.
 
