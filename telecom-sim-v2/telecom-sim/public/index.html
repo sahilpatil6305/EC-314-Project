@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OSI Telecom Simulator</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── SCANLINE OVERLAY (unique aesthetic) ──────────────────────── -->
+  <div class="scanlines"></div>
+  <div class="crt-vignette"></div>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────── -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <div class="logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">OSI<span class="logo-accent">·</span>SIM</span>
+        <span class="logo-bracket">]</span>
+      </div>
+      <div class="version">v1.0 — Full Stack Telecom Simulator</div>
+    </div>
+    <div class="hdr-pills">
+      <span class="pill pill-ws" id="wsPill">⬡ CONNECTING</span>
+      <span class="pill" id="linkPill">LINK ●</span>
+      <span class="pill pill-live" id="simPill">● LIVE</span>
+    </div>
+    <div class="hdr-right">
+      <button class="btn btn-danger" id="btnFault" onclick="UI.injectFault()">⚡ FAULT</button>
+      <button class="btn btn-primary" id="btnToggle" onclick="UI.toggleSim()">⏸ PAUSE</button>
+      <button class="btn" onclick="UI.resetSim()">↺ RESET</button>
+    </div>
+  </header>
+
+  <!-- ── KPI TICKER ────────────────────────────────────────────────── -->
+  <div class="kpi-ticker" id="kpiTicker">
+    <div class="kpi-item" data-key="thr">
+      <span class="kpi-lbl">THROUGHPUT</span>
+      <span class="kpi-val" id="kThr">—</span>
+      <span class="kpi-unit">Mbps</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spThr" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="lat">
+      <span class="kpi-lbl">LATENCY</span>
+      <span class="kpi-val" id="kLat">—</span>
+      <span class="kpi-unit">ms</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spLat" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="ploss">
+      <span class="kpi-lbl">PKT LOSS</span>
+      <span class="kpi-val" id="kPL">—</span>
+      <span class="kpi-unit">%</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spPL" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="ber">
+      <span class="kpi-lbl">BER</span>
+      <span class="kpi-val" id="kBER">—</span>
+      <span class="kpi-unit"></span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spBER" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="snr">
+      <span class="kpi-lbl">SNR</span>
+      <span class="kpi-val" id="kSNR">—</span>
+      <span class="kpi-unit">dB</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spSNR" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="cap">
+      <span class="kpi-lbl">CAPACITY</span>
+      <span class="kpi-val" id="kCap">—</span>
+      <span class="kpi-unit">Mbps</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spCap" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="jit">
+      <span class="kpi-lbl">JITTER</span>
+      <span class="kpi-val" id="kJit">—</span>
+      <span class="kpi-unit">ms</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spJit" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item" data-key="arq">
+      <span class="kpi-lbl">ARQ EFF</span>
+      <span class="kpi-val" id="kARQ">—</span>
+      <span class="kpi-unit">%</span>
+      <div class="kpi-spark"><canvas class="spark-canvas" id="spARQ" width="80" height="24"></canvas></div>
+    </div>
+    <div class="kpi-item">
+      <span class="kpi-lbl">SENT / RCVD</span>
+      <span class="kpi-val"><span id="kSent">0</span>/<span id="kRcvd">0</span></span>
+      <span class="kpi-unit">pkts</span>
+    </div>
+    <div class="kpi-item">
+      <span class="kpi-lbl">RETRANS</span>
+      <span class="kpi-val" id="kRetrans">0</span>
+      <span class="kpi-unit"></span>
+    </div>
+  </div>
+
+  <!-- ── MAIN BODY ─────────────────────────────────────────────────── -->
+  <main class="body">
+
+    <!-- LEFT: Config Panel -->
+    <aside class="panel panel-config">
+      <div class="panel-head">
+        <span class="panel-title">// CONFIG</span>
+        <button class="btn btn-sm btn-primary" onclick="UI.applyAndStart()">▶ RUN</button>
+      </div>
+      <div class="config-scroll" id="configPanel"></div>
+    </aside>
+
+    <!-- CENTER: Visualisation -->
+    <section class="panel panel-canvas">
+      <div class="panel-head">
+        <span class="panel-title">// NETWORK TOPOLOGY</span>
+        <div class="canvas-controls">
+          <select id="layerHighlight" onchange="Renderer.setHighlight(+this.value)" class="select-sm">
+            <option value="0">All layers</option>
+            <option value="7">L7 Application</option>
+            <option value="6">L6 Presentation</option>
+            <option value="5">L5 Session</option>
+            <option value="4">L4 Transport</option>
+            <option value="3">L3 Network</option>
+            <option value="2">L2 Data Link</option>
+            <option value="1">L1 Physical</option>
+          </select>
+          <button class="btn btn-sm" onclick="UI.sendBurst(10)">▶ BURST×10</button>
+          <button class="btn btn-sm" onclick="UI.sendBurst(50)">▶ BURST×50</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="netCanvas"></canvas>
+        <div class="canvas-overlay" id="nodeTooltip" style="display:none"></div>
+      </div>
+      <div class="canvas-legend">
+        <span class="leg-item"><span class="leg-dot" style="background:#388bfd"></span>Data</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#3fb950"></span>ACK</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#f85149"></span>Lost/NACK</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#d29922"></span>Retransmit</span>
+        <span class="leg-item"><span class="leg-dot" style="background:#a371f7"></span>Control</span>
+        <span class="leg-item" id="topologyLabel" style="margin-left:auto"></span>
+      </div>
+    </section>
+
+    <!-- RIGHT: OSI Layers + Log + ARQ -->
+    <aside class="panel panel-right">
+      <div class="tabs">
+        <button class="tab active" onclick="UI.switchTab('layers')">LAYERS</button>
+        <button class="tab" onclick="UI.switchTab('arq')">ARQ</button>
+        <button class="tab" onclick="UI.switchTab('frame')">FRAME</button>
+        <button class="tab" onclick="UI.switchTab('log')">LOG</button>
+      </div>
+
+      <!-- Layers tab -->
+      <div class="tab-content active" id="tc-layers">
+        <div class="osi-stack" id="osiStack"></div>
+      </div>
+
+      <!-- ARQ tab -->
+      <div class="tab-content" id="tc-arq">
+        <div class="arq-view" id="arqView"></div>
+      </div>
+
+      <!-- Frame tab -->
+      <div class="tab-content" id="tc-frame">
+        <div class="frame-view" id="frameView"></div>
+      </div>
+
+      <!-- Log tab -->
+      <div class="tab-content" id="tc-log">
+        <div class="log-controls">
+          <button class="btn btn-sm" onclick="Log.clear()">CLEAR</button>
+          <select id="logFilter" onchange="Log.render()" class="select-sm">
+            <option value="all">ALL</option>
+            <option value="L1">L1 PHY</option>
+            <option value="L2">L2 DL</option>
+            <option value="L3">L3 NET</option>
+            <option value="L4">L4 TRN</option>
+            <option value="ARQ">ARQ</option>
+            <option value="ERR">ERRORS</option>
+          </select>
+        </div>
+        <div class="log-body" id="logBody"></div>
+      </div>
+    </aside>
+
+  </main>
+
+</div>
+
+<script src="js/renderer.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/log.js"></script>
+<script src="js/ws.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
