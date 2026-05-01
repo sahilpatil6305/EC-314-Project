@@ -1,6 +1,6 @@
 # EC-314 Project: OSI Telecom Network Simulator
 
-A hands-on network simulation tool built to understand how data flows through all 7 OSI layers. This project explores real channel models, ARQ protocols, error correction, and visualizes everything in real-time.
+A hands-on network simulation tool built showing how data flows through all 7 OSI layers. This project explores real channel models, ARQ protocols, error correction, and visualizes everything in real-time.
 
 
 
@@ -109,4 +109,5 @@ The channel models use standard communications theory formulas. If you're compar
 
 ---
 
-Built as part of EC-314 coursework. Feel free to fork, extend, or break things while learning.
+Built as part of EC-314 coursework. 
+Team Members: Sahil Patil, Angraj Shah, Vedant Vanjhari
